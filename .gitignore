@@ -60,7 +60,7 @@ build
 public/wallet
 
 
-# Synpress directories and files
+# Synpress directories
 screenshots
 videos
-cypress
+videos-ci

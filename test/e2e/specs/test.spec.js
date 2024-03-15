@@ -4,8 +4,7 @@ describe('Wallet App Test Cases', () => {
     it(`should setup Keplr account and connect with Agoric Chain`, () => {
       cy.setupWallet().then((setupFinished) => {
         expect(setupFinished).to.be.true;
-
-        cy.visit('localhost:3000');
+        cy.visit('/');
 
         cy.acceptAccess().then((taskCompleted) => {
           expect(taskCompleted).to.be.true;
@@ -14,7 +13,7 @@ describe('Wallet App Test Cases', () => {
     });
 
     it('should connect with keplr wallet and succeed in provisioning a new wallet', () => {
-      cy.visit('localhost:3000/wallet/');
+      cy.visit('/wallet/');
 
       cy.get('input.PrivateSwitchBase-input').click();
       cy.contains('Proceed').click();
