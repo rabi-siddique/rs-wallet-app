@@ -22,7 +22,7 @@ describe('Wallet App Test Cases', () => {
       cy.get('button[aria-label="Settings"]').click();
 
       cy.get('#demo-simple-select').click();
-      cy.get('li[data-value="local"]').click();
+      cy.get('li[data-value="testnet"]').click();
       cy.contains('button', 'Connect').click();
 
       cy.acceptAccess().then((taskCompleted) => {
