@@ -4,8 +4,13 @@
 export network=https://emerynet.rpc.agoric.net:443
 export accountName="rabi-dev"
 export mnemonic="orbit bench unit task food shock brand bracket domain regular warfare company announce wheel grape trust sphere boy doctor half guard ritual three ecology"
-export AGORIC_NET=emerynet
 export accountAddress=agoric1p2aqakv3ulz4qfy2nut86j9gx0dx0yw09h96md
+
+export mnemonicGov1="such field health riot cost kitten silly tube flash wrap festival portion imitate this make question host bitter puppy wait area glide soldier knee"
+export mnemonicGov2="physical immune cargo feel crawl style fox require inhale law local glory cheese bring swear royal spy buyer diesel field when task spin alley"
+export gov1AccountAddress=agoric1ee9hr0jyrxhy999y755mp862ljgycmwyp4pl7q
+export gov2AccountAddress=agoric1wrfh296eu2z34p6pah7q04jjuyj3mxu9v98277
+export user1Address=agoric1ydzxwh6f893jvpaslmaz6l8j2ulup9a7x8qvvq
 
 check_field_presence() {
   field_value=$(echo "$output" | jq -r ".$1")
@@ -15,11 +20,11 @@ check_field_presence() {
   fi
 }
 
-add_keys() {
-  commandToExecute="agd keys add $accountName --recover --keyring-backend=test"
+addKeys() {
+  commandToExecute="agd keys add $1 --recover --keyring-backend=test"
   mnemonicPrompt="Enter your bip39 mnemonic"
 
-  expect -c "
+  output=$(expect -c "
       spawn $commandToExecute
       expect {
           \"override\" {
@@ -27,10 +32,26 @@ add_keys() {
               exp_continue
           }
           \"$mnemonicPrompt\" {
-              send \"$mnemonic\r\"
+              send \"$2\r\"
               exp_continue
           }
       }
-  "
+      expect eof
+  ")
+
+  echo "$output"
 }
 
+addKeyAndCheck() {
+    keyName="$1"
+    mnemonic="$2"
+    expectedAddress="$3"
+
+    result=$(addKeys "$keyName" "$mnemonic")
+    if [[ $result == *"$expectedAddress"* ]]; then
+        echo "Keys for $keyName added successfully"
+    else
+        echo "Error: $result" >&2
+        exit 1
+    fi
+}
