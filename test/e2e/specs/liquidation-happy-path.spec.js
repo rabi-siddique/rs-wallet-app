@@ -271,13 +271,30 @@ describe('Wallet App Test Cases', () => {
     });
 
     it('should create 3 vaults from the CLI successfully', () => {
-      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh').then(
-        (result) => {
-          const regex = /Vault created successfully/g;
-          const matches = result.stdout.match(regex);
-          expect(matches).to.have.lengthOf(3);
-        },
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh', {
+        failOnNonZeroExit: false,
+      }).then((result) => {
+        const regex = /Vault created successfully/g;
+        const matches = result.stdout.match(regex);
+        expect(matches).to.have.lengthOf(3);
+      });
+    });
+
+    it('should check for the existence of vaults on the UI', () => {
+      cy.visit(
+        'https://bafybeidafiu4scsvzjshz4zlaqilb62acjzwhf4np4qw7xzrommn3jkgti.ipfs.cf-ipfs.com/#/vaults',
       );
+
+      cy.contains('button', 'Back to vaults').click();
+
+      const expectedIntegers = ['100', '103', '105'];
+
+      cy.contains('span', 'Debt').each(($element, index) => {
+        const nextElement = $element.next();
+        const text = nextElement.text();
+        const integerPart = parseInt(text.match(/\d+/)[0]);
+        expect(integerPart.toString()).to.equal(expectedIntegers[index]);
+      });
     });
   });
 });

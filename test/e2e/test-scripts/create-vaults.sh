@@ -10,8 +10,7 @@ createAndCheckVault() {
     agops vaults open --wantMinted "$wantMinted" --giveCollateral "$giveCollateral" >/tmp/want-ist.json
     echo "Broadcasting..."
     output=$(agops perf satisfaction --executeOffer /tmp/want-ist.json --from $user1Address --keyring-backend=test)
-    wait
-
+    
     if [ $? -eq 0 ]; then
         echo "Vault created successfully"
     else
