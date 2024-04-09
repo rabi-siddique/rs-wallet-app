@@ -239,19 +239,29 @@ describe('Wallet App Test Cases', () => {
       cy.contains('p', 'RPC Endpoint:')
         .next('div')
         .find('input')
-        .should('be.visible')
-        .clear()
-        .type('http://localhost:26657');
-
+        .clear({ force: true })
+        .then(() => {
+          cy.wait(3000);
+          cy.contains('p', 'RPC Endpoint:')
+            .next('div')
+            .find('input')
+            .invoke('val', '')
+            .type('http://localhost:26657');
+        });
       cy.contains('li', 'Add "http://localhost:26657"').click();
 
       cy.contains('p', 'API Endpoint:')
         .next('div')
         .find('input')
-        .should('be.visible')
-        .clear()
-        .type('http://localhost:1317');
-
+        .clear({ force: true })
+        .then(() => {
+          cy.wait(3000);
+          cy.contains('p', 'API Endpoint:')
+            .next('div')
+            .find('input')
+            .invoke('val', '')
+            .type('http://localhost:1317');
+        });
       cy.contains('li', 'Add "http://localhost:1317"').click();
 
       cy.contains('button', 'Save').click();
@@ -283,7 +293,7 @@ describe('Wallet App Test Cases', () => {
     });
 
     it('should check for the existence of vaults on the UI', () => {
-      cy.reload()
+      cy.reload();
 
       cy.contains('button', 'Back to vaults').click();
 
@@ -300,7 +310,7 @@ describe('Wallet App Test Cases', () => {
 
   context('Place bids and make all vaults enter liquidation', () => {
     it('should place bids from the CLI successfully', () => {
-      cy.switchWallet('gov1');
+      cy.switchWallet('gov2');
       cy.addNewTokensFound();
       cy.getTokenAmount('IST').then((initialTokenValue) => {
         cy.exec('bash ./test/e2e/test-scripts/place-bids.sh', {
