@@ -239,6 +239,7 @@ describe('Wallet App Test Cases', () => {
       cy.contains('p', 'RPC Endpoint:')
         .next('div')
         .find('input')
+        .should('be.visible')
         .clear()
         .type('http://localhost:26657');
 
@@ -247,6 +248,7 @@ describe('Wallet App Test Cases', () => {
       cy.contains('p', 'API Endpoint:')
         .next('div')
         .find('input')
+        .should('be.visible')
         .clear()
         .type('http://localhost:1317');
 
