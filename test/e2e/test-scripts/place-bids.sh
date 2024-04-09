@@ -1,8 +1,6 @@
 #!/bin/bash
 source ./test/e2e/test-scripts/common.sh
 
-#!/bin/bash
-
 placeBidByPrice() {
     fromAddress=$1
     giveAmount=$2

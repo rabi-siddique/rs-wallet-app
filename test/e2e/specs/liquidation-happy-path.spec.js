@@ -325,5 +325,20 @@ describe('Wallet App Test Cases', () => {
         });
       });
     });
+
+    it('should set ATOM price to 9.99', () => {
+      cy.exec('bash ./test/e2e/test-scripts/set-oracle-price.sh 9.99').then(
+        (result) => {
+          expect(result.stderr).to.contain('');
+          expect(result.stdout).to.contain('Success: Price set to 9.99');
+        },
+      );
+    });
+
+    it('should check for the existence of no vaults on the UI', () => {
+      cy.reload();
+      cy.contains('button', 'Back to vaults').click();
+      cy.contains('div', 'You have not opened any vaults yet.');
+    });
   });
 });
