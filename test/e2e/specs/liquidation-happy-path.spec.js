@@ -283,9 +283,7 @@ describe('Wallet App Test Cases', () => {
     });
 
     it('should check for the existence of vaults on the UI', () => {
-      cy.visit(
-        'https://bafybeidafiu4scsvzjshz4zlaqilb62acjzwhf4np4qw7xzrommn3jkgti.ipfs.cf-ipfs.com/#/vaults',
-      );
+      cy.reload()
 
       cy.contains('button', 'Back to vaults').click();
 
@@ -296,6 +294,25 @@ describe('Wallet App Test Cases', () => {
         const text = nextElement.text();
         const integerPart = parseInt(text.match(/\d+/)[0]);
         expect(integerPart.toString()).to.equal(expectedIntegers[index]);
+      });
+    });
+  });
+
+  context('Place bids and make all vaults enter liquidation', () => {
+    it('should place bids from the CLI successfully', () => {
+      cy.switchWallet('gov1');
+      cy.addNewTokensFound();
+      cy.getTokenAmount('IST').then((initialTokenValue) => {
+        cy.exec('bash ./test/e2e/test-scripts/place-bids.sh', {
+          failOnNonZeroExit: false,
+        }).then((result) => {
+          const regex = /Bid Placed Successfully/g;
+          const matches = result.stdout.match(regex);
+          expect(matches).to.have.lengthOf(3);
+          cy.getTokenAmount('IST').then((tokenValue) => {
+            expect(tokenValue).to.lessThan(initialTokenValue);
+          });
+        });
       });
     });
   });
