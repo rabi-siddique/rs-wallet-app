@@ -9,14 +9,16 @@ createAndCheckVault() {
     echo "Creating Vault..."
     agops vaults open --wantMinted "$wantMinted" --giveCollateral "$giveCollateral" >/tmp/want-ist.json
     echo "Broadcasting..."
-    output=$(agops perf satisfaction --executeOffer /tmp/want-ist.json --from $user1Address --keyring-backend=test)
+    output=$(agops perf satisfaction --executeOffer /tmp/want-ist.json --from $user1Address --keyring-backend=test 2>&1)
+    wait
     
-    if [ $? -eq 0 ]; then
-        echo "Vault created successfully"
-    else
-        echo "Command failed"
-        echo "$output"
+    errorMessage=$(echo "$output" | grep -oP "error: '\K.*?(?=')" | sed "s/', id:.*//")
+
+    if [ -n "$errorMessage" ]; then
+        echo "Command failed. Error message: $errorMessage"
         exit 1
+    else
+        echo "Vault created successfully"
     fi
 }
 
