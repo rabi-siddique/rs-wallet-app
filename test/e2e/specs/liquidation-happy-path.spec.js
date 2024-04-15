@@ -315,4 +315,32 @@ describe('Wallet App Test Cases', () => {
       cy.contains('#10').should('exist');
     });
   });
+
+  context('Place bids and make all vaults enter liquidation', () => {
+    it('should place bids from the CLI successfully', () => {
+      cy.switchWallet('gov2');
+      cy.addNewTokensFound();
+      cy.getTokenAmount('IST').then((initialTokenValue) => {
+        cy.exec('bash ./test/e2e/test-scripts/place-bids.sh', {
+          failOnNonZeroExit: false,
+        }).then((result) => {
+          const regex = /Bid Placed Successfully/g;
+          const matches = result.stdout.match(regex);
+          expect(matches).to.have.lengthOf(3);
+          cy.getTokenAmount('IST').then((tokenValue) => {
+            expect(tokenValue).to.lessThan(initialTokenValue);
+          });
+        });
+      });
+    });
+
+    it('should set ATOM price to 9.99', () => {
+      cy.exec('bash ./test/e2e/test-scripts/set-oracle-price.sh 9.99').then(
+        (result) => {
+          expect(result.stderr).to.contain('');
+          expect(result.stdout).to.contain('Success: Price set to 9.99');
+        },
+      );
+    });
+  });
 });
