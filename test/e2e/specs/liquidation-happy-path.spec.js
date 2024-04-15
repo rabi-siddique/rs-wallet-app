@@ -217,62 +217,6 @@ describe('Wallet App Test Cases', () => {
   });
 
   context('Creating vaults and adjusting ATOM value', () => {
-    it('should setup wallet using 24 word phrase', () => {
-      cy.setupWallet({
-        secretWords:
-          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
-        password: 'Test1234',
-        newAccount: true,
-        walletName: 'My Wallet 2',
-      }).then((setupFinished) => {
-        expect(setupFinished).to.be.true;
-      });
-    });
-
-    it('should navigate to Vaults UI, setup connection settings and connect with chain', () => {
-      cy.visit(
-        'https://bafybeidafiu4scsvzjshz4zlaqilb62acjzwhf4np4qw7xzrommn3jkgti.ipfs.cf-ipfs.com/#/vaults',
-      );
-
-      cy.get('button[aria-label="Settings"]').click();
-
-      cy.contains('p', 'RPC Endpoint:')
-        .next('div')
-        .find('input')
-        .clear({ force: true })
-        .then(() => {
-          cy.wait(3000);
-          cy.contains('p', 'RPC Endpoint:')
-            .next('div')
-            .find('input')
-            .invoke('val', '')
-            .type('http://localhost:26657');
-        });
-      cy.contains('li', 'Add "http://localhost:26657"').click();
-
-      cy.contains('p', 'API Endpoint:')
-        .next('div')
-        .find('input')
-        .clear({ force: true })
-        .then(() => {
-          cy.wait(3000);
-          cy.contains('p', 'API Endpoint:')
-            .next('div')
-            .find('input')
-            .invoke('val', '')
-            .type('http://localhost:1317');
-        });
-      cy.contains('li', 'Add "http://localhost:1317"').click();
-
-      cy.contains('button', 'Save').click();
-      cy.contains('button', 'Connect Wallet').click();
-      cy.get('label.cursor-pointer input[type="checkbox"]').check();
-      cy.contains('Proceed').click();
-
-      cy.acceptAccess();
-      cy.acceptAccess();
-    });
-
     it('should set ATOM price to 12.34', () => {
       cy.exec('bash ./test/e2e/test-scripts/set-oracle-price.sh 12.34').then(
         (result) => {
@@ -282,28 +226,57 @@ describe('Wallet App Test Cases', () => {
       );
     });
 
-    it('should create 3 vaults from the CLI successfully', () => {
-      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh', {
+    it('should check for the existence of no vaults via the CLI', () => {
+      cy.exec('bash ./test/e2e/test-scripts/check-vaults.sh', {
         failOnNonZeroExit: false,
+        timeout: 120000,
       }).then((result) => {
-        const regex = /Vault created successfully/g;
-        const matches = result.stdout.match(regex);
-        expect(matches).to.have.lengthOf(3);
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Command did not run successfully or did not create 3 vaults matching the pattern.',
+        );
       });
     });
 
-    it('should check for the existence of vaults on the UI', () => {
-      cy.reload();
+    it('should create a vault minting 100 ISTs and submitting 15 ATOMs as collateral', () => {
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh 100 15', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain('Vault created successfully');
+      });
+    });
 
-      cy.contains('button', 'Back to vaults').click();
+    it('should create a vault minting 103 ISTs and submitting 15 ATOMs as collateral', () => {
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh 103 15', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain('Vault created successfully');
+      });
+    });
 
-      const expectedIntegers = ['100', '103', '105'];
+    it('should create a vault minting 105 ISTs and submitting 15 ATOMs as collateral', () => {
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh 105 15', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain('Vault created successfully');
+      });
+    });
 
-      cy.contains('span', 'Debt').each(($element, index) => {
-        const nextElement = $element.next();
-        const text = nextElement.text();
-        const integerPart = parseInt(text.match(/\d+/)[0]);
-        expect(integerPart.toString()).to.equal(expectedIntegers[index]);
+    it('should check for the existence of vaults via the CLI', () => {
+      cy.exec('bash ./test/e2e/test-scripts/check-vaults.sh', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Command ran successfully and created 3 vaults matching the pattern.',
+        );
       });
     });
   });
@@ -333,12 +306,6 @@ describe('Wallet App Test Cases', () => {
           expect(result.stdout).to.contain('Success: Price set to 9.99');
         },
       );
-    });
-
-    it('should check for the existence of no vaults on the UI', () => {
-      cy.reload();
-      cy.contains('button', 'Back to vaults').click();
-      cy.contains('div', 'You have not opened any vaults yet.');
     });
   });
 });

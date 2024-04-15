@@ -39,5 +39,5 @@ placeBidByDiscount() {
 
 
 placeBidByPrice $gov1AccountAddress 0.1IST 9
+placeBidByDiscount $gov1AccountAddress 0.15IST 9
 placeBidByDiscount $gov1AccountAddress 0.2IST 9
-placeBidByDiscount $gov1AccountAddress 0.3IST 9
