@@ -217,6 +217,59 @@ describe('Wallet App Test Cases', () => {
   });
 
   context('Creating vaults and adjusting ATOM value', () => {
+    it('should setup wallet using 24 word phrase', () => {
+      cy.setupWallet({
+        secretWords:
+          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
+        password: 'Test1234',
+        newAccount: true,
+        walletName: 'My Wallet 2',
+      }).then((setupFinished) => {
+        expect(setupFinished).to.be.true;
+      });
+    });
+    it('should navigate to Vaults UI, setup connection settings and connect with chain', () => {
+      cy.visit(
+        'https://bafybeifekj7jtnir5gm2qh5gkltbkc3yoqluzujdgsmhgynlzbc5tfhm3m.ipfs.cf-ipfs.com/#/vaults',
+      );
+      cy.get('button[aria-label="Settings"]').click();
+
+      cy.contains('p', 'RPC Endpoint:')
+        .next('div')
+        .find('input')
+        .clear({ force: true })
+        .then(() => {
+          cy.wait(3000);
+          cy.contains('p', 'RPC Endpoint:')
+            .next('div')
+            .find('input')
+            .invoke('val', '')
+            .type('http://localhost:26657');
+        });
+      cy.contains('li', 'Add "http://localhost:26657"').click();
+
+      cy.contains('p', 'API Endpoint:')
+        .next('div')
+        .find('input')
+        .clear({ force: true })
+        .then(() => {
+          cy.wait(3000);
+          cy.contains('p', 'API Endpoint:')
+            .next('div')
+            .find('input')
+            .invoke('val', '')
+            .type('http://localhost:1317');
+        });
+      cy.contains('li', 'Add "http://localhost:1317"').click();
+
+      cy.contains('button', 'Save').click();
+      cy.contains('button', 'Connect Wallet').click();
+      cy.get('label.cursor-pointer input[type="checkbox"]').check();
+      cy.contains('Proceed').click();
+
+      cy.acceptAccess();
+      cy.acceptAccess();
+    });
     it('should set ATOM price to 12.34', () => {
       cy.exec('bash ./test/e2e/test-scripts/set-oracle-price.sh 12.34').then(
         (result) => {
@@ -278,6 +331,13 @@ describe('Wallet App Test Cases', () => {
           'Command ran successfully and created 3 vaults matching the pattern.',
         );
       });
+    });
+
+    it('should check for the existence of vaults on the UI', () => {
+      cy.contains('button', 'Back to vaults').click();
+      cy.contains('#8').should('exist');
+      cy.contains('#9').should('exist');
+      cy.contains('#10').should('exist');
     });
   });
 
