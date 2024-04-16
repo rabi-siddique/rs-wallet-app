@@ -14,6 +14,11 @@ describe('Wallet App Test Cases', () => {
           'physical immune cargo feel crawl style fox require inhale law local glory cheese bring swear royal spy buyer diesel field when task spin alley',
         walletName: 'gov1',
       });
+      cy.setupWallet({
+        secretWords:
+          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
+        walletName: 'user1',
+      });
     });
 
     it('should connect with chain and wallet', () => {
@@ -217,16 +222,8 @@ describe('Wallet App Test Cases', () => {
   });
 
   context('Creating vaults and adjusting ATOM value', () => {
-    it('should setup wallet using 24 word phrase', () => {
-      cy.setupWallet({
-        secretWords:
-          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
-        password: 'Test1234',
-        newAccount: true,
-        walletName: 'My Wallet 2',
-      }).then((setupFinished) => {
-        expect(setupFinished).to.be.true;
-      });
+    it('switch to user1 wallet', () => {
+      cy.switchWallet('user1');
     });
     it('should navigate to Vaults UI, setup connection settings and connect with chain', () => {
       cy.visit(
@@ -371,6 +368,20 @@ describe('Wallet App Test Cases', () => {
           expect(result.stderr).to.contain('');
           expect(result.stdout).to.contain('Success: Price set to 9.99');
         },
+      );
+    });
+
+    it('switch to user1 wallet', () => {
+      cy.switchWallet('user1');
+    });
+
+    it('should verify vaults that are at a risk of being liquidated', () => {
+      cy.visit(
+        'https://bafybeifekj7jtnir5gm2qh5gkltbkc3yoqluzujdgsmhgynlzbc5tfhm3m.ipfs.cf-ipfs.com/#/vaults',
+      );
+      cy.contains(
+        'div',
+        '3 vaults are at risk. Please increase your collateral or repay your outstanding IST debt.',
       );
     });
   });
