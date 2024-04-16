@@ -317,6 +317,27 @@ describe('Wallet App Test Cases', () => {
   });
 
   context('Place bids and make all vaults enter liquidation', () => {
+    it('should connect with keplr wallet and succeed in provisioning a new wallet', () => {
+      cy.visit('/wallet/');
+
+      cy.get('input.PrivateSwitchBase-input').click();
+      cy.contains('Proceed').click();
+
+      cy.get('button[aria-label="Settings"]').click();
+
+      cy.get('#demo-simple-select').click();
+      cy.get('li[data-value="local"]').click();
+      cy.contains('button', 'Connect').click();
+
+      cy.acceptAccess().then((taskCompleted) => {
+        expect(taskCompleted).to.be.true;
+      });
+
+      cy.reload();
+
+      cy.get('span').contains('ATOM').should('exist');
+      cy.get('span').contains('BLD').should('exist');
+    });
     it('should place bids from the CLI successfully', () => {
       cy.switchWallet('gov2');
       cy.addNewTokensFound();
@@ -332,6 +353,16 @@ describe('Wallet App Test Cases', () => {
           });
         });
       });
+    });
+
+    it('should see an bids placed in the previous test case', () => {
+      cy.contains('Offer').should('be.visible');
+      cy.contains('Give Bid').should('be.visible');
+      cy.contains('from IST').should('be.visible');
+      cy.contains('Arguments').should('be.visible');
+      cy.contains('0.10 IST').should('be.visible');
+      cy.contains('0.15 IST').should('be.visible');
+      cy.contains('0.20 IST').should('be.visible');
     });
 
     it('should set ATOM price to 9.99', () => {
