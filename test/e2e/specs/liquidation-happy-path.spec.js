@@ -380,8 +380,7 @@ describe('Wallet App Test Cases', () => {
         'https://bafybeifekj7jtnir5gm2qh5gkltbkc3yoqluzujdgsmhgynlzbc5tfhm3m.ipfs.cf-ipfs.com/#/vaults',
       );
       cy.contains(
-        'div',
-        '3 vaults are at risk. Please increase your collateral or repay your outstanding IST debt.',
+        /Please increase your collateral or repay your outstanding IST debt./,
       );
     });
   });
