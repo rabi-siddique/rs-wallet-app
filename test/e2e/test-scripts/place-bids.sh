@@ -38,6 +38,6 @@ placeBidByDiscount() {
 }
 
 
-placeBidByPrice $gov1AccountAddress 0.1IST 9
-placeBidByDiscount $gov1AccountAddress 0.15IST 9
-placeBidByDiscount $gov1AccountAddress 0.2IST 9
+placeBidByPrice $gov1AccountAddress 90IST 9
+placeBidByDiscount $gov1AccountAddress 80IST 10
+placeBidByDiscount $gov1AccountAddress 150IST 15
