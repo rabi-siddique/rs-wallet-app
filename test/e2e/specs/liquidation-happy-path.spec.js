@@ -137,38 +137,10 @@ describe('Wallet App Test Cases', () => {
       cy.get('button').contains('Change Auctioneer Params').click();
 
       cy.get('label')
-        .contains('StartingRate')
+        .contains('ClockStep')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('105');
-        });
-
-      cy.get('label')
-        .contains('LowestRate')
-        .parent()
-        .within(() => {
-          cy.get('input').clear().type('65');
-        });
-
-      cy.get('label')
-        .contains('DiscountStep')
-        .parent()
-        .within(() => {
-          cy.get('input').clear().type('5');
-        });
-
-      cy.get('label')
-        .contains('AuctionStartDelay')
-        .parent()
-        .within(() => {
-          cy.get('input').clear().type('2');
-        });
-
-      cy.get('label')
-        .contains('StartFrequency')
-        .parent()
-        .within(() => {
-          cy.get('input').clear().type('60');
+          cy.get('input').clear().type('10');
         });
 
       cy.get('label')
@@ -177,6 +149,41 @@ describe('Wallet App Test Cases', () => {
         .within(() => {
           cy.get('input').clear().type('30');
         });
+
+      cy.get('label')
+        .contains('StartFrequency')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('300');
+        });
+
+      // cy.get('label')
+      //   .contains('StartingRate')
+      //   .parent()
+      //   .within(() => {
+      //     cy.get('input').clear().type('105');
+      //   });
+
+      // cy.get('label')
+      //   .contains('LowestRate')
+      //   .parent()
+      //   .within(() => {
+      //     cy.get('input').clear().type('65');
+      //   });
+
+      // cy.get('label')
+      //   .contains('DiscountStep')
+      //   .parent()
+      //   .within(() => {
+      //     cy.get('input').clear().type('5');
+      //   });
+
+      // cy.get('label')
+      //   .contains('AuctionStartDelay')
+      //   .parent()
+      //   .within(() => {
+      //     cy.get('input').clear().type('2');
+      //   });
 
       cy.get('label')
         .contains('Minutes until close of vote')
@@ -408,17 +415,93 @@ describe('Wallet App Test Cases', () => {
       );
     });
 
-    it('should wait for 9 minutes verify and verify vaults being liquidated', () => {
-      cy.wait(9 * 60 * 1000);
+    it('should wait for 12 minutes and verify vaults are being liquidated', () => {
+      cy.wait(12 * 60 * 1000);
       cy.contains(/3 vaults are liquidating./);
     });
 
-    it('should view the auction and verify the values from the CLI successfully', () => {
-      cy.exec('bash ./test/e2e/test-scripts/view-auction.sh', {
-        failOnNonZeroExit: false,
-      }).then((result) => {
+    it('should view the auction and verify the value of startPrice from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startPrice" "9.99 IST/ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
         expect(result.stderr).to.contain('');
-        expect(result.stdout).to.contain('All required fields are present');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of startProceedsGoal from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startProceedsGoal" "309.54 IST"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of startCollateral from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startCollateral" "45 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of collateralAvailable from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "45 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should wait for 3 minutes and verify vaults are liquidated', () => {
+      cy.wait(3 * 60 * 1000);
+      cy.contains('div', 'Collateral left to claim')
+        .next()
+        .should('contain', '3.42 ATOM');
+
+      cy.contains('div', 'Collateral left to claim')
+        .next()
+        .should('contain', '3.07 ATOM');
+
+      cy.contains('div', 'Collateral left to claim')
+        .next()
+        .should('contain', '2.84 ATOM');
+    });
+
+    it('should view the auction and verify the value of collateralAvailable from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "9.659301 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
       });
     });
   });
