@@ -397,5 +397,19 @@ describe('Wallet App Test Cases', () => {
         /Please increase your collateral or repay your outstanding IST debt./,
       );
     });
+
+    it('should wait for 9 minutes verify and verify vaults being liquidated', () => {
+      cy.wait(9 * 60 * 1000);
+      cy.contains(/3 vaults are liquidating./);
+    });
+
+    it('should view the auction and verify the values from the CLI successfully', () => {
+      cy.exec('bash ./test/e2e/test-scripts/view-auction.sh', {
+        failOnNonZeroExit: false,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain('All required fields are present');
+      });
+    });
   });
 });
