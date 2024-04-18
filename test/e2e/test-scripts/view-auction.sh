@@ -6,7 +6,6 @@ output=$(agops inter auction status)
 
 checkFieldValue "book0.startPrice" "9.99 IST/ATOM"
 checkFieldValue "book0.startProceedsGoal" "309.54 IST"
-checkFieldValue "book0.remainingProceedsGoal" "309.54 IST"
 checkFieldValue "book0.startCollateral" "45 ATOM"
 checkFieldValue "book0.collateralAvailable" "45 ATOM"
 

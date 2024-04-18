@@ -349,6 +349,16 @@ describe('Wallet App Test Cases', () => {
       cy.get('span').contains('ATOM').should('exist');
       cy.get('span').contains('BLD').should('exist');
     });
+
+    it('should create a vault minting 400 ISTs and submitting 80 ATOMs as collateral', () => {
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh 400 80 gov1', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).not.to.contain('Error');
+      });
+    });
     it('should place bids from the CLI successfully', () => {
       cy.switchWallet('gov2');
       cy.addNewTokensFound();
@@ -371,9 +381,9 @@ describe('Wallet App Test Cases', () => {
       cy.contains('Give Bid').should('be.visible');
       cy.contains('from IST').should('be.visible');
       cy.contains('Arguments').should('be.visible');
-      cy.contains('0.10 IST').should('be.visible');
-      cy.contains('0.15 IST').should('be.visible');
-      cy.contains('0.20 IST').should('be.visible');
+      cy.contains('90.00 IST').should('be.visible');
+      cy.contains('80.00 IST').should('be.visible');
+      cy.contains('150.00 IST').should('be.visible');
     });
 
     it('should set ATOM price to 9.99', () => {
