@@ -165,6 +165,20 @@ describe('Wallet App Test Cases', () => {
         });
 
       cy.get('label')
+        .contains('StartFrequency')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('60');
+        });
+
+      cy.get('label')
+        .contains('PriceLockPeriod')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('30');
+        });
+
+      cy.get('label')
         .contains('Minutes until close of vote')
         .parent()
         .within(() => {
