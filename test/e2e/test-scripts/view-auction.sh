@@ -1,6 +1,7 @@
 #!/bin/bash
 
 source ./test/e2e/test-scripts/common.sh
+export AGORIC_NET=emerynet
 
 output=$(agops inter auction status)
 
