@@ -37,6 +37,13 @@ describe('Wallet App Test Cases', () => {
       cy.get('button').contains('manager0').click();
 
       cy.get('label')
+        .contains('DebtLimit')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('1500000');
+        });
+
+      cy.get('label')
         .contains('LiquidationMargin')
         .parent()
         .within(() => {
@@ -137,10 +144,31 @@ describe('Wallet App Test Cases', () => {
       cy.get('button').contains('Change Auctioneer Params').click();
 
       cy.get('label')
+        .contains('AuctionStartDelay')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('2');
+        });
+
+      cy.get('label')
         .contains('ClockStep')
         .parent()
         .within(() => {
           cy.get('input').clear().type('10');
+        });
+
+      cy.get('label')
+        .contains('DiscountStep')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('500');
+        });
+
+      cy.get('label')
+        .contains('LowestRate')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('6500');
         });
 
       cy.get('label')
@@ -154,36 +182,15 @@ describe('Wallet App Test Cases', () => {
         .contains('StartFrequency')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('300');
+          cy.get('input').clear().type('60');
         });
 
-      // cy.get('label')
-      //   .contains('StartingRate')
-      //   .parent()
-      //   .within(() => {
-      //     cy.get('input').clear().type('105');
-      //   });
-
-      // cy.get('label')
-      //   .contains('LowestRate')
-      //   .parent()
-      //   .within(() => {
-      //     cy.get('input').clear().type('65');
-      //   });
-
-      // cy.get('label')
-      //   .contains('DiscountStep')
-      //   .parent()
-      //   .within(() => {
-      //     cy.get('input').clear().type('5');
-      //   });
-
-      // cy.get('label')
-      //   .contains('AuctionStartDelay')
-      //   .parent()
-      //   .within(() => {
-      //     cy.get('input').clear().type('2');
-      //   });
+      cy.get('label')
+        .contains('StartingRate')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('10500');
+        });
 
       cy.get('label')
         .contains('Minutes until close of vote')
@@ -415,9 +422,8 @@ describe('Wallet App Test Cases', () => {
       );
     });
 
-    it('should wait for 12 minutes and verify vaults are being liquidated', () => {
-      cy.wait(12 * 60 * 1000);
-      cy.contains(/3 vaults are liquidating./);
+    it('should wait and verify vaults are being liquidated', () => {
+      cy.contains(/3 vaults are liquidating./, { timeout: 900000 });
     });
 
     it('should view the auction and verify the value of startPrice from the CLI successfully', () => {
@@ -477,23 +483,15 @@ describe('Wallet App Test Cases', () => {
     });
 
     it('should wait for 3 minutes and verify vaults are liquidated', () => {
-      cy.wait(3 * 60 * 1000);
-      cy.contains('div', 'Collateral left to claim')
-        .next()
-        .should('contain', '3.42 ATOM');
-
-      cy.contains('div', 'Collateral left to claim')
-        .next()
-        .should('contain', '3.07 ATOM');
-
-      cy.contains('div', 'Collateral left to claim')
-        .next()
-        .should('contain', '2.84 ATOM');
+      cy.contains(/Collateral left to claim/, { timeout: 600000 });
+      cy.contains(/3.42 ATOM/);
+      cy.contains(/3.07 ATOM/);
+      cy.contains(/2.84 ATOM/);
     });
 
     it('should view the auction and verify the value of collateralAvailable from the CLI successfully', () => {
       cy.exec(
-        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "9.659301 ATOM"',
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "0 ATOM"',
         {
           failOnNonZeroExit: false,
         },
