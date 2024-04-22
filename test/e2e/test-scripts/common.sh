@@ -6,6 +6,7 @@ export accountName="rabi-dev"
 export mnemonic="orbit bench unit task food shock brand bracket domain regular warfare company announce wheel grape trust sphere boy doctor half guard ritual three ecology"
 export accountAddress=agoric1p2aqakv3ulz4qfy2nut86j9gx0dx0yw09h96md
 
+<<<<<<< HEAD
 export mnemonicGov1="such field health riot cost kitten silly tube flash wrap festival portion imitate this make question host bitter puppy wait area glide soldier knee"
 export mnemonicGov2="physical immune cargo feel crawl style fox require inhale law local glory cheese bring swear royal spy buyer diesel field when task spin alley"
 export mnemonicUser1="tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom"
@@ -16,6 +17,11 @@ export user1Address=agoric1ydzxwh6f893jvpaslmaz6l8j2ulup9a7x8qvvq
 checkFieldValue() {
   fieldValue=$(echo "$output" | jq -r ".$1")
   if [ -z "$fieldValue" ]; then
+=======
+check_field_presence() {
+  field_value=$(echo "$output" | jq -r ".$1")
+  if [ -z "$field_value" ]; then
+>>>>>>> main
     echo "Error: $1 field is missing or empty"
     exit 1
   fi
@@ -29,11 +35,19 @@ checkFieldValue() {
   fi
 }
 
+<<<<<<< HEAD
 addKeys() {
   commandToExecute="agd keys add $1 --recover --keyring-backend=test"
   mnemonicPrompt="Enter your bip39 mnemonic"
 
   output=$(expect -c "
+=======
+add_keys() {
+  commandToExecute="agd keys add $accountName --recover --keyring-backend=test"
+  mnemonicPrompt="Enter your bip39 mnemonic"
+
+  expect -c "
+>>>>>>> main
       spawn $commandToExecute
       expect {
           \"override\" {
@@ -41,6 +55,7 @@ addKeys() {
               exp_continue
           }
           \"$mnemonicPrompt\" {
+<<<<<<< HEAD
               send \"$2\r\"
               exp_continue
           }
@@ -64,3 +79,12 @@ addKeyAndCheck() {
         exit 1
     fi
 }
+=======
+              send \"$mnemonic\r\"
+              exp_continue
+          }
+      }
+  "
+}
+
+>>>>>>> main
