@@ -14,6 +14,11 @@ describe('Wallet App Test Cases', () => {
           'physical immune cargo feel crawl style fox require inhale law local glory cheese bring swear royal spy buyer diesel field when task spin alley',
         walletName: 'gov1',
       });
+      cy.setupWallet({
+        secretWords:
+          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
+        walletName: 'user1',
+      });
     });
 
     it('should connect with chain and wallet', () => {
@@ -30,6 +35,13 @@ describe('Wallet App Test Cases', () => {
       cy.get('button').contains('Vaults').click();
       cy.get('button').contains('Select Manager').click();
       cy.get('button').contains('manager0').click();
+
+      cy.get('label')
+        .contains('DebtLimit')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('1500000');
+        });
 
       cy.get('label')
         .contains('LiquidationMargin')
@@ -132,31 +144,52 @@ describe('Wallet App Test Cases', () => {
       cy.get('button').contains('Change Auctioneer Params').click();
 
       cy.get('label')
-        .contains('StartingRate')
+        .contains('AuctionStartDelay')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('105');
+          cy.get('input').clear().type('2');
         });
 
       cy.get('label')
-        .contains('LowestRate')
+        .contains('ClockStep')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('65');
+          cy.get('input').clear().type('10');
         });
 
       cy.get('label')
         .contains('DiscountStep')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('5');
+          cy.get('input').clear().type('500');
         });
 
       cy.get('label')
-        .contains('AuctionStartDelay')
+        .contains('LowestRate')
         .parent()
         .within(() => {
-          cy.get('input').clear().type('2');
+          cy.get('input').clear().type('6500');
+        });
+
+      cy.get('label')
+        .contains('PriceLockPeriod')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('30');
+        });
+
+      cy.get('label')
+        .contains('StartFrequency')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('60');
+        });
+
+      cy.get('label')
+        .contains('StartingRate')
+        .parent()
+        .within(() => {
+          cy.get('input').clear().type('10500');
         });
 
       cy.get('label')
@@ -217,16 +250,8 @@ describe('Wallet App Test Cases', () => {
   });
 
   context('Creating vaults and adjusting ATOM value', () => {
-    it('should setup wallet using 24 word phrase', () => {
-      cy.setupWallet({
-        secretWords:
-          'tackle hen gap lady bike explain erode midnight marriage wide upset culture model select dial trial swim wood step scan intact what card symptom',
-        password: 'Test1234',
-        newAccount: true,
-        walletName: 'My Wallet 2',
-      }).then((setupFinished) => {
-        expect(setupFinished).to.be.true;
-      });
+    it('switch to user1 wallet', () => {
+      cy.switchWallet('user1');
     });
     it('should navigate to Vaults UI, setup connection settings and connect with chain', () => {
       cy.visit(
@@ -313,6 +338,169 @@ describe('Wallet App Test Cases', () => {
       cy.contains('#8').should('exist');
       cy.contains('#9').should('exist');
       cy.contains('#10').should('exist');
+    });
+  });
+
+  context('Place bids and make all vaults enter liquidation', () => {
+    it('should connect with keplr wallet and succeed in provisioning a new wallet', () => {
+      cy.visit('/wallet/');
+
+      cy.get('input.PrivateSwitchBase-input').click();
+      cy.contains('Proceed').click();
+
+      cy.get('button[aria-label="Settings"]').click();
+
+      cy.get('#demo-simple-select').click();
+      cy.get('li[data-value="local"]').click();
+      cy.contains('button', 'Connect').click();
+
+      cy.acceptAccess().then((taskCompleted) => {
+        expect(taskCompleted).to.be.true;
+      });
+
+      cy.reload();
+
+      cy.get('span').contains('ATOM').should('exist');
+      cy.get('span').contains('BLD').should('exist');
+    });
+
+    it('should create a vault minting 400 ISTs and submitting 80 ATOMs as collateral', () => {
+      cy.exec('bash ./test/e2e/test-scripts/create-vaults.sh 400 80 gov1', {
+        failOnNonZeroExit: false,
+        timeout: 120000,
+      }).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).not.to.contain('Error');
+      });
+    });
+    it('should place bids from the CLI successfully', () => {
+      cy.switchWallet('gov2');
+      cy.addNewTokensFound();
+      cy.getTokenAmount('IST').then((initialTokenValue) => {
+        cy.exec('bash ./test/e2e/test-scripts/place-bids.sh', {
+          failOnNonZeroExit: false,
+        }).then((result) => {
+          const regex = /Bid Placed Successfully/g;
+          const matches = result.stdout.match(regex);
+          expect(matches).to.have.lengthOf(3);
+          cy.getTokenAmount('IST').then((tokenValue) => {
+            expect(tokenValue).to.lessThan(initialTokenValue);
+          });
+        });
+      });
+    });
+
+    it('should see an bids placed in the previous test case', () => {
+      cy.contains('Offer').should('be.visible');
+      cy.contains('Give Bid').should('be.visible');
+      cy.contains('from IST').should('be.visible');
+      cy.contains('Arguments').should('be.visible');
+      cy.contains('90.00 IST').should('be.visible');
+      cy.contains('80.00 IST').should('be.visible');
+      cy.contains('150.00 IST').should('be.visible');
+    });
+
+    it('should set ATOM price to 9.99', () => {
+      cy.exec('bash ./test/e2e/test-scripts/set-oracle-price.sh 9.99').then(
+        (result) => {
+          expect(result.stderr).to.contain('');
+          expect(result.stdout).to.contain('Success: Price set to 9.99');
+        },
+      );
+    });
+
+    it('switch to user1 wallet', () => {
+      cy.switchWallet('user1');
+    });
+
+    it('should verify vaults that are at a risk of being liquidated', () => {
+      cy.visit(
+        'https://bafybeifekj7jtnir5gm2qh5gkltbkc3yoqluzujdgsmhgynlzbc5tfhm3m.ipfs.cf-ipfs.com/#/vaults',
+      );
+      cy.contains(
+        /Please increase your collateral or repay your outstanding IST debt./,
+      );
+    });
+
+    it('should wait and verify vaults are being liquidated', () => {
+      cy.contains(/3 vaults are liquidating./, { timeout: 900000 });
+    });
+
+    it('should view the auction and verify the value of startPrice from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startPrice" "9.99 IST/ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of startProceedsGoal from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startProceedsGoal" "309.54 IST"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of startCollateral from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.startCollateral" "45 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should view the auction and verify the value of collateralAvailable from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "45 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
+    });
+
+    it('should wait for 3 minutes and verify vaults are liquidated', () => {
+      cy.contains(/Collateral left to claim/, { timeout: 600000 });
+      cy.contains(/3.42 ATOM/);
+      cy.contains(/3.07 ATOM/);
+      cy.contains(/2.84 ATOM/);
+    });
+
+    it('should view the auction and verify the value of collateralAvailable from the CLI successfully', () => {
+      cy.exec(
+        'bash ./test/e2e/test-scripts/view-auction.sh "book0.collateralAvailable" "0 ATOM"',
+        {
+          failOnNonZeroExit: false,
+        },
+      ).then((result) => {
+        expect(result.stderr).to.contain('');
+        expect(result.stdout).to.contain(
+          'Field is present and expected value is matched',
+        );
+      });
     });
   });
 });

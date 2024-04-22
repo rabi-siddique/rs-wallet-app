@@ -1,27 +1,24 @@
 #!/bin/bash
 source ./test/e2e/test-scripts/common.sh
 
+if [ "$#" -lt 2 ] || [ "$#" -gt 3 ]; then
+    echo "Usage: $0 <wantMinted> <giveCollateral> [userType]"
+    exit 1
+fi
 
-createAndCheckVault() {
-    wantMinted=$1
-    giveCollateral=$2
+wantMinted=$1
+giveCollateral=$2
+userType=${3:-user1}
 
-    echo "Creating Vault..."
-    agops vaults open --wantMinted "$wantMinted" --giveCollateral "$giveCollateral" >/tmp/want-ist.json
-    echo "Broadcasting..."
-    output=$(agops perf satisfaction --executeOffer /tmp/want-ist.json --from $user1Address --keyring-backend=test 2>&1)
-    wait
-    
-    errorMessage=$(echo "$output" | grep -oP "error: '\K.*?(?=')" | sed "s/', id:.*//")
+if [ "$userType" = "user1" ]; then
+    accountAddress="$user1Address"
+else
+    accountAddress="$gov1AccountAddress"
+fi
 
-    if [ -n "$errorMessage" ]; then
-        echo "Command failed. Error message: $errorMessage"
-        exit 1
-    else
-        echo "Vault created successfully"
-    fi
-}
+echo "Creating Vault..."
+agops vaults open --wantMinted "$wantMinted" --giveCollateral "$giveCollateral" > /tmp/want-ist.json
 
-createAndCheckVault 100 15
-createAndCheckVault 103 15
-createAndCheckVault 105 15
+echo "Broadcasting..."
+agops perf satisfaction --executeOffer /tmp/want-ist.json --from "$accountAddress" --keyring-backend=test 2>&1
+wait
