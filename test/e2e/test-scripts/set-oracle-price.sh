@@ -13,7 +13,6 @@ addKeyAndCheck "gov2" "$mnemonicGov2" "$gov2AccountAddress"
 addKeyAndCheck "user1" "$mnemonicUser1" "$user1Address"
 
 output=$(agops oracle setPrice --keys gov1,gov2 --pair ATOM.USD --price $1 --keyring-backend test)
-wait
 
 if [ $? -eq 0 ]; then
     echo "Success: Price set to $1"
